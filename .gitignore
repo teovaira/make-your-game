@@ -136,3 +136,18 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# Claude Code — personal, never team policy
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Theo's local-only dev infrastructure — see CLAUDE.md "Never git-commit these"
+specs.txt
+audits.txt
+ROADMAP.md
+CLAUDE.md
+project-generator-prompt.md
+claude-code-infrastructure-blueprint.md
+.claude/
+.mcp.json
+.vscode/
+
