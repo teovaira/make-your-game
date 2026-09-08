@@ -41,4 +41,17 @@ describe('initGameState', () => {
     expect(state.grid).toHaveLength(GRID_ROWS);
     state.grid.forEach((row) => expect(row).toHaveLength(GRID_COLS));
   });
+
+  it('surrounds the grid with hard-block walls on the border', () => {
+    const state = initGameState();
+
+    for (let col = 0; col < GRID_COLS; col += 1) {
+      expect(state.grid[0][col].type).toBe('wall');
+      expect(state.grid[GRID_ROWS - 1][col].type).toBe('wall');
+    }
+    for (let row = 0; row < GRID_ROWS; row += 1) {
+      expect(state.grid[row][0].type).toBe('wall');
+      expect(state.grid[row][GRID_COLS - 1].type).toBe('wall');
+    }
+  });
 });
