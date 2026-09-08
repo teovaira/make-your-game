@@ -13,7 +13,8 @@ function buildGrid() {
   for (let row = 0; row < GRID_ROWS; row += 1) {
     const cols = [];
     for (let col = 0; col < GRID_COLS; col += 1) {
-      cols.push({ type: 'empty' });
+      const isBorder = row === 0 || row === GRID_ROWS - 1 || col === 0 || col === GRID_COLS - 1;
+      cols.push({ type: isBorder ? 'wall' : 'empty' });
     }
     grid.push(cols);
   }
