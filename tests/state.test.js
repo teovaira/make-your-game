@@ -6,6 +6,8 @@ import {
   DEFAULT_MAX_BOMBS,
   DEFAULT_BLAST_RADIUS,
   TILE_SIZE_PX,
+  GRID_ROWS,
+  GRID_COLS,
 } from '../src/constants.js';
 
 describe('initGameState', () => {
@@ -31,5 +33,12 @@ describe('initGameState', () => {
     expect(state.player.col).toBe(1);
     expect(state.player.x).toBe(1 * TILE_SIZE_PX);
     expect(state.player.y).toBe(1 * TILE_SIZE_PX);
+  });
+
+  it('returns a grid with GRID_ROWS rows and GRID_COLS columns', () => {
+    const state = initGameState();
+
+    expect(state.grid).toHaveLength(GRID_ROWS);
+    state.grid.forEach((row) => expect(row).toHaveLength(GRID_COLS));
   });
 });
