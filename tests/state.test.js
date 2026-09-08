@@ -54,4 +54,14 @@ describe('initGameState', () => {
       expect(state.grid[row][GRID_COLS - 1].type).toBe('wall');
     }
   });
+
+  it('places hard-block pillars on even interior row/column intersections', () => {
+    const state = initGameState();
+
+    for (let row = 2; row < GRID_ROWS - 1; row += 2) {
+      for (let col = 2; col < GRID_COLS - 1; col += 2) {
+        expect(state.grid[row][col].type).toBe('wall');
+      }
+    }
+  });
 });
