@@ -14,7 +14,8 @@ function buildGrid() {
     const cols = [];
     for (let col = 0; col < GRID_COLS; col += 1) {
       const isBorder = row === 0 || row === GRID_ROWS - 1 || col === 0 || col === GRID_COLS - 1;
-      cols.push({ type: isBorder ? 'wall' : 'empty' });
+      const isPillar = row % 2 === 0 && col % 2 === 0;
+      cols.push({ type: isBorder || isPillar ? 'wall' : 'empty' });
     }
     grid.push(cols);
   }
