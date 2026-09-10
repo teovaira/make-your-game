@@ -64,4 +64,17 @@ describe('initGameState', () => {
       }
     }
   });
+
+  it('fills eligible interior tiles with soft blocks when the RNG always favors placement', () => {
+    const state = initGameState({ random: () => 0 });
+
+    for (let row = 1; row < GRID_ROWS - 1; row += 1) {
+      for (let col = 1; col < GRID_COLS - 1; col += 1) {
+        const isPillar = row % 2 === 0 && col % 2 === 0;
+        if (!isPillar) {
+          expect(state.grid[row][col].type).toBe('soft');
+        }
+      }
+    }
+  });
 });
