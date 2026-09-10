@@ -71,10 +71,25 @@ describe('initGameState', () => {
     for (let row = 1; row < GRID_ROWS - 1; row += 1) {
       for (let col = 1; col < GRID_COLS - 1; col += 1) {
         const isPillar = row % 2 === 0 && col % 2 === 0;
-        if (!isPillar) {
+        const isSpawnSafeZone =
+          (row === 1 && col === 1) || (row === 1 && col === 2) || (row === 2 && col === 1);
+        if (!isPillar && !isSpawnSafeZone) {
           expect(state.grid[row][col].type).toBe('soft');
         }
       }
     }
+  });
+
+  it('keeps the spawn safe zone clear of soft blocks even when the RNG always favors placement', () => {
+    const state = initGameState({ random: () => 0 });
+
+    const safeZone = [
+      [1, 1],
+      [1, 2],
+      [2, 1],
+    ];
+    safeZone.forEach(([row, col]) => {
+      expect(state.grid[row][col].type).not.toBe('soft');
+    });
   });
 });
