@@ -11,6 +11,7 @@ export const EXPLOSION_DURATION_MS = 500;
 // Retune once Phase 2 movement is testable in-browser; the speed * dt scaling won't change.
 export const PLAYER_SPEED = 0.15; // px/ms — crosses one 40px tile in ~267ms
 export const ENEMY_SPEED = 0.1; // px/ms — ~400ms/tile, slower than the player by design
+export const SOFT_BLOCK_DENSITY = 0.6; // probability an eligible interior tile becomes soft
 
 export const ENEMY_COUNT = 3; // one fixed level, so a single value instead of a 2-4 range
 
