@@ -16,11 +16,13 @@ function buildGrid(random) {
     for (let col = 0; col < GRID_COLS; col += 1) {
       const isBorder = row === 0 || row === GRID_ROWS - 1 || col === 0 || col === GRID_COLS - 1;
       const isPillar = row % 2 === 0 && col % 2 === 0;
+      const isSpawnSafeZone =
+        (row === 1 && col === 1) || (row === 1 && col === 2) || (row === 2 && col === 1);
 
       let type = 'empty';
       if (isBorder || isPillar) {
         type = 'wall';
-      } else if (random() < SOFT_BLOCK_DENSITY) {
+      } else if (!isSpawnSafeZone && random() < SOFT_BLOCK_DENSITY) {
         type = 'soft';
       }
 
