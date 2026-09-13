@@ -103,7 +103,12 @@ describe('initGameState', () => {
   });
 
   it('places ENEMY_COUNT alive, walkable enemies outside the spawn safe zone', () => {
-    const state = initGameState({ random: () => 0.9 });
+    // Alternates above/below SOFT_BLOCK_DENSITY so the board contains a genuine mix of
+    // 'soft' and 'empty' cells — a constant fixture yields all-or-nothing terrain and can
+    // never actually exercise the "not on a soft block" assertion below.
+    let call = 0;
+    const random = () => (call++ % 2 === 0 ? 0.1 : 0.9);
+    const state = initGameState({ random });
 
     expect(state.enemies).toHaveLength(ENEMY_COUNT);
 
@@ -114,7 +119,7 @@ describe('initGameState', () => {
     ];
     state.enemies.forEach((enemy) => {
       expect(enemy.alive).toBe(true);
-      expect(state.grid[enemy.row][enemy.col].type).not.toBe('wall');
+      expect(state.grid[enemy.row][enemy.col].type).toBe('empty');
       expect(safeZone).not.toContainEqual([enemy.row, enemy.col]);
     });
   });
