@@ -32,6 +32,11 @@ export const ENEMY_POINTS = {
   chaser: 200,
 };
 
+// AI-type registry — kept separate from ENEMY_POINTS (a scoring table) even though today
+// every AI type has a matching score entry. If you add an AI type, you'll usually want to
+// add a score entry too, but the two lists are allowed to diverge.
+export const ENEMY_AI_TYPES = ['walker', 'chaser'];
+
 // Arrows + WASD both bound; Space for bomb; Escape is fixed (not remappable) so it can
 // always reach the pause menu even mid-play.
 export const KEY_BINDINGS = {

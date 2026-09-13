@@ -8,7 +8,7 @@ import {
   GRID_COLS,
   SOFT_BLOCK_DENSITY,
   ENEMY_COUNT,
-  ENEMY_POINTS,
+  ENEMY_AI_TYPES,
   PLAYER_SPAWN,
 } from './constants.js';
 
@@ -59,7 +59,7 @@ function buildEnemies(grid, random) {
     }
   }
 
-  const aiTypes = Object.keys(ENEMY_POINTS);
+  const aiTypes = ENEMY_AI_TYPES;
   const enemies = [];
   for (let i = 0; i < ENEMY_COUNT && candidates.length > 0; i += 1) {
     const index = Math.floor(random() * candidates.length);
