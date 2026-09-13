@@ -8,6 +8,7 @@ import {
   TILE_SIZE_PX,
   GRID_ROWS,
   GRID_COLS,
+  ENEMY_COUNT,
 } from '../src/constants.js';
 
 describe('initGameState', () => {
@@ -99,5 +100,22 @@ describe('initGameState', () => {
     expect(typeof state.exit.row).toBe('number');
     expect(typeof state.exit.col).toBe('number');
     expect(state.grid[state.exit.row][state.exit.col].type).toBe('soft');
+  });
+
+  it('places ENEMY_COUNT alive, walkable enemies outside the spawn safe zone', () => {
+    const state = initGameState({ random: () => 0.9 });
+
+    expect(state.enemies).toHaveLength(ENEMY_COUNT);
+
+    const safeZone = [
+      [1, 1],
+      [1, 2],
+      [2, 1],
+    ];
+    state.enemies.forEach((enemy) => {
+      expect(enemy.alive).toBe(true);
+      expect(state.grid[enemy.row][enemy.col].type).not.toBe('wall');
+      expect(safeZone).not.toContainEqual([enemy.row, enemy.col]);
+    });
   });
 });
