@@ -21,6 +21,8 @@ function isInSpawnSafeZone(row, col) {
   );
 }
 
+// RNG contract: random() is called once per eligible interior cell, in row-major order,
+// while building the grid; then once more to pick which soft cell conceals the exit.
 function buildGrid(random) {
   const grid = [];
   const softCells = [];
@@ -49,6 +51,8 @@ function buildGrid(random) {
   return { grid, exit };
 }
 
+// RNG contract (continued): after buildGrid's calls above, random() is called once per
+// enemy placed here, up to ENEMY_COUNT times.
 function buildEnemies(grid, random) {
   const candidates = [];
   for (let row = 0; row < GRID_ROWS; row += 1) {
