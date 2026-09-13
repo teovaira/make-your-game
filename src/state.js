@@ -11,6 +11,7 @@ import {
 
 function buildGrid(random) {
   const grid = [];
+  const softCells = [];
   for (let row = 0; row < GRID_ROWS; row += 1) {
     const cols = [];
     for (let col = 0; col < GRID_COLS; col += 1) {
@@ -24,22 +25,29 @@ function buildGrid(random) {
         type = 'wall';
       } else if (!isSpawnSafeZone && random() < SOFT_BLOCK_DENSITY) {
         type = 'soft';
+        softCells.push({ row, col });
       }
 
       cols.push({ type });
     }
     grid.push(cols);
   }
-  return grid;
+
+  const exit = softCells[Math.floor(random() * softCells.length)];
+
+  return { grid, exit };
 }
 
 export function initGameState({ random = Math.random } = {}) {
+  const { grid, exit } = buildGrid(random);
+
   return {
     status: 'idle',
     score: 0,
     elapsedMs: 0,
     timeRemainingMs: STAGE_TIME_LIMIT_MS,
-    grid: buildGrid(random),
+    grid,
+    exit,
     bombs: [],
     explosions: [],
     powerUps: [],
