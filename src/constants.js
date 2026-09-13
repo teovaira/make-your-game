@@ -11,8 +11,14 @@ export const EXPLOSION_DURATION_MS = 500;
 // Retune once Phase 2 movement is testable in-browser; the speed * dt scaling won't change.
 export const PLAYER_SPEED = 0.15; // px/ms — crosses one 40px tile in ~267ms
 export const ENEMY_SPEED = 0.1; // px/ms — ~400ms/tile, slower than the player by design
+export const SOFT_BLOCK_DENSITY = 0.6; // probability an eligible interior tile becomes soft
 
 export const ENEMY_COUNT = 3; // one fixed level, so a single value instead of a 2-4 range
+
+// Player's starting tile. Also anchors the 3-tile spawn safe zone (this tile, one right,
+// one down) that's excluded from soft-block placement and enemy spawns — keep this as the
+// only place spawn coordinates are written; isInSpawnSafeZone derives from it.
+export const PLAYER_SPAWN = { row: 1, col: 1 };
 
 export const DEFAULT_MAX_BOMBS = 1;
 export const DEFAULT_BLAST_RADIUS = 1; // tile
@@ -25,6 +31,11 @@ export const ENEMY_POINTS = {
   walker: 100,
   chaser: 200,
 };
+
+// AI-type registry — kept separate from ENEMY_POINTS (a scoring table) even though today
+// every AI type has a matching score entry. If you add an AI type, you'll usually want to
+// add a score entry too, but the two lists are allowed to diverge.
+export const ENEMY_AI_TYPES = ['walker', 'chaser'];
 
 // Arrows + WASD both bound; Space for bomb; Escape is fixed (not remappable) so it can
 // always reach the pause menu even mid-play.
