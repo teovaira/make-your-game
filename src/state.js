@@ -9,10 +9,16 @@ import {
   SOFT_BLOCK_DENSITY,
   ENEMY_COUNT,
   ENEMY_POINTS,
+  PLAYER_SPAWN,
 } from './constants.js';
 
 function isInSpawnSafeZone(row, col) {
-  return (row === 1 && col === 1) || (row === 1 && col === 2) || (row === 2 && col === 1);
+  const { row: spawnRow, col: spawnCol } = PLAYER_SPAWN;
+  return (
+    (row === spawnRow && col === spawnCol) ||
+    (row === spawnRow && col === spawnCol + 1) ||
+    (row === spawnRow + 1 && col === spawnCol)
+  );
 }
 
 function buildGrid(random) {
@@ -87,10 +93,10 @@ export function initGameState({ random = Math.random } = {}) {
     powerUps: [],
     enemies,
     player: {
-      row: 1,
-      col: 1,
-      x: 1 * TILE_SIZE_PX,
-      y: 1 * TILE_SIZE_PX,
+      row: PLAYER_SPAWN.row,
+      col: PLAYER_SPAWN.col,
+      x: PLAYER_SPAWN.col * TILE_SIZE_PX,
+      y: PLAYER_SPAWN.row * TILE_SIZE_PX,
       direction: 'down',
       alive: true,
       livesRemaining: DEFAULT_LIVES,

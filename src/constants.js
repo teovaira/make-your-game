@@ -15,6 +15,11 @@ export const SOFT_BLOCK_DENSITY = 0.6; // probability an eligible interior tile 
 
 export const ENEMY_COUNT = 3; // one fixed level, so a single value instead of a 2-4 range
 
+// Player's starting tile. Also anchors the 3-tile spawn safe zone (this tile, one right,
+// one down) that's excluded from soft-block placement and enemy spawns — keep this as the
+// only place spawn coordinates are written; isInSpawnSafeZone derives from it.
+export const PLAYER_SPAWN = { row: 1, col: 1 };
+
 export const DEFAULT_MAX_BOMBS = 1;
 export const DEFAULT_BLAST_RADIUS = 1; // tile
 export const DEFAULT_LIVES = 3; // classic max is 9; this is the starting count
