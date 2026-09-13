@@ -92,4 +92,12 @@ describe('initGameState', () => {
       expect(state.grid[row][col].type).not.toBe('soft');
     });
   });
+
+  it('conceals the exit under one of the placed soft blocks', () => {
+    const state = initGameState({ random: () => 0 });
+
+    expect(typeof state.exit.row).toBe('number');
+    expect(typeof state.exit.col).toBe('number');
+    expect(state.grid[state.exit.row][state.exit.col].type).toBe('soft');
+  });
 });
