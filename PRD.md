@@ -73,7 +73,7 @@ Chosen for its excellent DOM fit: a deterministic tile grid with no physics simu
 
 - Grid of **13 columns × 11 rows** (143 tiles), rendered as DOM elements.
 - Solid **hard blocks** form the outer border plus interior pillars on even-row/even-column tiles. Hard blocks are indestructible and stop blasts.
-- **Soft blocks** are destructible, placed randomly on remaining tiles. Destroying one may reveal a power-up or the exit.
+- **Soft blocks** are destructible, placed randomly on remaining tiles (excluding the player's starting safe zone). Destroying one may reveal a power-up or the exit.
 - Movement is 4-directional (up/down/left/right) only — no diagonals.
 
 **Bombs & explosions**
