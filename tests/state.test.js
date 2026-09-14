@@ -154,9 +154,15 @@ describe('initGameState', () => {
   it('does not crash when the RNG returns exactly 1 during enemy index selection', () => {
     const state = initGameState({ random: () => 1 });
 
+    const safeZone = [
+      [1, 1],
+      [1, 2],
+      [2, 1],
+    ];
     expect(state.enemies).toHaveLength(ENEMY_COUNT);
     state.enemies.forEach((enemy) => {
-      expect(state.grid[enemy.row][enemy.col]).toBeDefined();
+      expect(state.grid[enemy.row][enemy.col].type).toBe('empty');
+      expect(safeZone).not.toContainEqual([enemy.row, enemy.col]);
     });
   });
 
