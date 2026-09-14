@@ -12,23 +12,35 @@ import {
 } from '../src/constants.js';
 
 describe('initGameState', () => {
-  it('returns a fresh idle GameState with default player stats', () => {
+  it('starts idle with zero score and a full stage timer', () => {
     const state = initGameState();
 
     expect(state.status).toBe('idle');
     expect(state.score).toBe(0);
     expect(state.elapsedMs).toBe(0);
     expect(state.timeRemainingMs).toBe(STAGE_TIME_LIMIT_MS);
+  });
+
+  it('starts with no bombs, explosions, or power-ups', () => {
+    const state = initGameState();
 
     expect(state.bombs).toEqual([]);
     expect(state.explosions).toEqual([]);
     expect(state.powerUps).toEqual([]);
+  });
+
+  it('starts the player alive with default stats', () => {
+    const state = initGameState();
 
     expect(state.player.alive).toBe(true);
     expect(state.player.livesRemaining).toBe(DEFAULT_LIVES);
     expect(state.player.maxBombs).toBe(DEFAULT_MAX_BOMBS);
     expect(state.player.activeBombs).toBe(0);
     expect(state.player.blastRadius).toBe(DEFAULT_BLAST_RADIUS);
+  });
+
+  it('places the player on the spawn tile with matching pixel coordinates', () => {
+    const state = initGameState();
 
     expect(state.player.row).toBe(1);
     expect(state.player.col).toBe(1);
