@@ -160,6 +160,16 @@ describe('initGameState', () => {
     });
   });
 
+  it('places every enemy on a distinct tile', () => {
+    // random: () => 1 recomputes the same clamped index every pick if the candidate pool
+    // isn't actually shrinking — a regression that stopped removing chosen candidates
+    // would stack every enemy on the same tile under this fixture.
+    const state = initGameState({ random: () => 1 });
+
+    const occupiedTiles = new Set(state.enemies.map((enemy) => `${enemy.row},${enemy.col}`));
+    expect(occupiedTiles.size).toBe(ENEMY_COUNT);
+  });
+
   it('guarantees ENEMY_COUNT enemies even when soft blocks fill every non-safe-zone tile', () => {
     const state = initGameState({ random: () => 0 });
     expect(state.enemies).toHaveLength(ENEMY_COUNT);
