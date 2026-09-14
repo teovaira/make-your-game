@@ -128,9 +128,10 @@ describe('initGameState', () => {
     expect(state.grid[state.exit.row][state.exit.col].type).toBe('soft');
   });
 
-  it('still defines an exit when the RNG never favors soft-block placement', () => {
+  it('still conceals an exit under a soft block when the RNG never favors soft-block placement', () => {
     const state = initGameState({ random: () => 1 });
     expect(state.exit).toBeDefined();
+    expect(state.grid[state.exit.row][state.exit.col].type).toBe('soft');
   });
 
   it('does not crash when the RNG returns exactly 1 during enemy index selection', () => {
