@@ -46,7 +46,8 @@ function buildGrid(random) {
     grid.push(cols);
   }
 
-  const exit = softCells[Math.floor(random() * softCells.length)];
+  const exitIndex = Math.min(Math.floor(random() * softCells.length), softCells.length - 1);
+  const exit = softCells[exitIndex];
 
   return { grid, exit };
 }
@@ -66,7 +67,7 @@ function buildEnemies(grid, random) {
   const aiTypes = ENEMY_AI_TYPES;
   const enemies = [];
   for (let i = 0; i < ENEMY_COUNT && candidates.length > 0; i += 1) {
-    const index = Math.floor(random() * candidates.length);
+    const index = Math.min(Math.floor(random() * candidates.length), candidates.length - 1);
     const { row, col } = candidates.splice(index, 1)[0];
     enemies.push({
       id: `enemy-${i}`,
