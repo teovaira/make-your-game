@@ -46,6 +46,20 @@ function buildGrid(random) {
     grid.push(cols);
   }
 
+  // Guarantee an exit can always be concealed, even if the RNG never favored soft-block
+  // placement (e.g. every roll landed above SOFT_BLOCK_DENSITY) — an unwinnable board with
+  // no error signal is worse than force-converting one tile.
+  if (softCells.length === 0) {
+    for (let row = 0; row < GRID_ROWS && softCells.length === 0; row += 1) {
+      for (let col = 0; col < GRID_COLS && softCells.length === 0; col += 1) {
+        if (grid[row][col].type === 'empty' && !isInSpawnSafeZone(row, col)) {
+          grid[row][col].type = 'soft';
+          softCells.push({ row, col });
+        }
+      }
+    }
+  }
+
   const exitIndex = Math.min(Math.floor(random() * softCells.length), softCells.length - 1);
   const exit = softCells[exitIndex];
 
