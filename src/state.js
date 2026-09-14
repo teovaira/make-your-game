@@ -68,19 +68,33 @@ function buildGrid(random) {
 
 // RNG contract (continued): after buildGrid's calls above, random() is called once per
 // enemy placed here, up to ENEMY_COUNT times.
-function buildEnemies(grid, random) {
+function buildEnemies(grid, random, exit) {
   const candidates = [];
+  const softCells = [];
   for (let row = 0; row < GRID_ROWS; row += 1) {
     for (let col = 0; col < GRID_COLS; col += 1) {
-      if (grid[row][col].type === 'empty' && !isInSpawnSafeZone(row, col)) {
+      const cell = grid[row][col];
+      if (cell.type === 'empty' && !isInSpawnSafeZone(row, col)) {
         candidates.push({ row, col });
+      } else if (cell.type === 'soft' && !(row === exit.row && col === exit.col)) {
+        softCells.push({ row, col });
       }
     }
   }
 
+  // Guarantee enough walkable tiles exist for every enemy, even if the RNG saturated the
+  // board with soft blocks — reclaims soft cells back to 'empty' (never the cell concealing
+  // the exit), so state.grid can end up with fewer 'soft' cells than the RNG roll alone
+  // produced.
+  while (candidates.length < ENEMY_COUNT && softCells.length > 0) {
+    const reclaimed = softCells.pop();
+    grid[reclaimed.row][reclaimed.col].type = 'empty';
+    candidates.push(reclaimed);
+  }
+
   const aiTypes = ENEMY_AI_TYPES;
   const enemies = [];
-  for (let i = 0; i < ENEMY_COUNT && candidates.length > 0; i += 1) {
+  for (let i = 0; i < ENEMY_COUNT; i += 1) {
     const index = Math.min(Math.floor(random() * candidates.length), candidates.length - 1);
     const { row, col } = candidates.splice(index, 1)[0];
     enemies.push({
@@ -98,7 +112,7 @@ function buildEnemies(grid, random) {
 
 export function initGameState({ random = Math.random } = {}) {
   const { grid, exit } = buildGrid(random);
-  const enemies = buildEnemies(grid, random);
+  const enemies = buildEnemies(grid, random, exit);
 
   return {
     status: 'idle',

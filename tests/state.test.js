@@ -69,16 +69,23 @@ describe('initGameState', () => {
   it('fills eligible interior tiles with soft blocks when the RNG always favors placement', () => {
     const state = initGameState({ random: () => 0 });
 
+    let eligibleCount = 0;
+    let softCount = 0;
     for (let row = 1; row < GRID_ROWS - 1; row += 1) {
       for (let col = 1; col < GRID_COLS - 1; col += 1) {
         const isPillar = row % 2 === 0 && col % 2 === 0;
         const isSpawnSafeZone =
           (row === 1 && col === 1) || (row === 1 && col === 2) || (row === 2 && col === 1);
         if (!isPillar && !isSpawnSafeZone) {
-          expect(state.grid[row][col].type).toBe('soft');
+          eligibleCount += 1;
+          if (state.grid[row][col].type === 'soft') softCount += 1;
         }
       }
     }
+    // Exactly ENEMY_COUNT of the eligible cells get reclaimed back to 'empty' to guarantee
+    // enemy placement (see buildEnemies), even when every RNG roll favored soft-block
+    // placement — deterministic under this fixture, not just "most of them."
+    expect(softCount).toBe(eligibleCount - ENEMY_COUNT);
   });
 
   it('keeps the spawn safe zone clear of soft blocks even when the RNG always favors placement', () => {
