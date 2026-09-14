@@ -39,6 +39,12 @@ describe('initGameState', () => {
     expect(state.player.blastRadius).toBe(DEFAULT_BLAST_RADIUS);
   });
 
+  it('starts the player facing down', () => {
+    const state = initGameState();
+
+    expect(state.player.direction).toBe('down');
+  });
+
   it('places the player on the spawn tile with matching pixel coordinates', () => {
     const state = initGameState();
 
