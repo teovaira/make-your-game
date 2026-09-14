@@ -106,7 +106,7 @@ describe('initGameState', () => {
     expect(softCount).toBe(eligibleCount - ENEMY_COUNT);
   });
 
-  it('keeps the spawn safe zone clear of soft blocks even when the RNG always favors placement', () => {
+  it('keeps the spawn safe zone and the player tile walkable even when the RNG always favors placement', () => {
     const state = initGameState({ random: () => 0 });
 
     const safeZone = [
@@ -115,8 +115,9 @@ describe('initGameState', () => {
       [2, 1],
     ];
     safeZone.forEach(([row, col]) => {
-      expect(state.grid[row][col].type).not.toBe('soft');
+      expect(state.grid[row][col].type).toBe('empty');
     });
+    expect(state.grid[state.player.row][state.player.col].type).toBe('empty');
   });
 
   it('conceals the exit under one of the placed soft blocks', () => {
