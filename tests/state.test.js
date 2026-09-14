@@ -9,6 +9,7 @@ import {
   GRID_ROWS,
   GRID_COLS,
   ENEMY_COUNT,
+  SOFT_BLOCK_DENSITY,
 } from '../src/constants.js';
 
 describe('initGameState', () => {
@@ -131,6 +132,22 @@ describe('initGameState', () => {
   it('still conceals an exit under a soft block when the RNG never favors soft-block placement', () => {
     const state = initGameState({ random: () => 1 });
     expect(state.exit).toBeDefined();
+    expect(state.grid[state.exit.row][state.exit.col].type).toBe('soft');
+  });
+
+  it('places no soft blocks from the main roll when the RNG equals SOFT_BLOCK_DENSITY exactly', () => {
+    // The placement check is strict `<`, so a roll exactly at the threshold counts as
+    // not favoring placement, same as any higher value — only the exit fallback's forced
+    // cell should end up soft.
+    const state = initGameState({ random: () => SOFT_BLOCK_DENSITY });
+
+    let softCount = 0;
+    for (const row of state.grid) {
+      for (const cell of row) {
+        if (cell.type === 'soft') softCount += 1;
+      }
+    }
+    expect(softCount).toBe(1);
     expect(state.grid[state.exit.row][state.exit.col].type).toBe('soft');
   });
 
