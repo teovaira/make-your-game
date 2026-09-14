@@ -21,8 +21,13 @@ function isInSpawnSafeZone(row, col) {
   );
 }
 
-// RNG contract: random() is called once per eligible interior cell, in row-major order,
-// while building the grid; then once more to pick which soft cell conceals the exit.
+// RNG contract: random() is called once per eligible interior cell — border, pillar, and
+// spawn-safe-zone cells are never eligible and never consume a call — in row-major order,
+// while building the grid; then once more to pick which soft cell conceals the exit. A
+// return value of exactly 1 is safe (the index pick is clamped); it does not need to stay
+// strictly below 1 the way Math.random()'s contract does. The exit-guarantee fallback below
+// (when the RNG never favors soft-block placement) does its own grid scan and consumes no
+// extra random() calls.
 function buildGrid(random) {
   const grid = [];
   const softCells = [];
@@ -67,7 +72,9 @@ function buildGrid(random) {
 }
 
 // RNG contract (continued): after buildGrid's calls above, random() is called once per
-// enemy placed here, up to ENEMY_COUNT times.
+// enemy placed here, up to ENEMY_COUNT times (a return value of exactly 1 is safe, same as
+// above). The enemy-count-guarantee reclaim below is a deterministic pop(), not random(),
+// so it doesn't change this call count either.
 function buildEnemies(grid, random, exit) {
   const candidates = [];
   const softCells = [];
