@@ -186,7 +186,9 @@ _Note: exact per-stage time limit and pillar spacing are conventions, not author
 **Team code standards (adopted from course good-practices guidance):**
 
 - DRY, KISS, YAGNI, SOC (rendering / game-state / input kept in separate modules).
-- Consistent naming (camelCase), consistent indentation, meaningful comments (no restating-the-obvious).
+- Consistent naming (camelCase), consistent indentation. Comments explain WHY, not
+  WHAT/HOW — no self-explanatory comments, and every comment must accurately describe
+  current behavior (update or delete comments a change invalidates).
 - Explicit error handling; avoid deep nesting; reasonable line-length limits.
 - Data/config (level layouts, tetromino shapes, enemy patterns, etc.) kept separate from logic — as data structures, not hardcoded values.
 
