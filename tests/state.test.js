@@ -116,6 +116,11 @@ describe('initGameState', () => {
     });
   });
 
+  it('guarantees ENEMY_COUNT enemies even when soft blocks fill every non-safe-zone tile', () => {
+    const state = initGameState({ random: () => 0 });
+    expect(state.enemies).toHaveLength(ENEMY_COUNT);
+  });
+
   it('places ENEMY_COUNT alive, walkable enemies outside the spawn safe zone', () => {
     // Alternates above/below SOFT_BLOCK_DENSITY so the board contains a genuine mix of
     // 'soft' and 'empty' cells — a constant fixture yields all-or-nothing terrain and can
