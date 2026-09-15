@@ -24,7 +24,7 @@ export const ENEMY_COUNT = 3; // one fixed level, so a single value instead of a
 // one down) that's excluded from soft-block placement and enemy spawns. That shape assumes
 // a top-left spawn — moving this toward another corner puts the zone on border walls, so
 // isInSpawnSafeZone would need reworking too.
-export const PLAYER_SPAWN = { row: 1, col: 1 };
+export const PLAYER_SPAWN = Object.freeze({ row: 1, col: 1 });
 
 export const DEFAULT_MAX_BOMBS = 1;
 export const DEFAULT_BLAST_RADIUS = 1; // tile
@@ -33,19 +33,19 @@ export const DEFAULT_LIVES = 3; // classic max is 9; this is the starting count
 export const STAGE_TIME_LIMIT_MS = 200000; // ~200s, a convention rather than a fixed rule
 
 // Two-tier scoring (walker/chaser) instead of the original's four-tier 100/200/400/800.
-export const ENEMY_POINTS = {
+export const ENEMY_POINTS = Object.freeze({
   walker: 100,
   chaser: 200,
-};
+});
 
 // AI-type registry — kept separate from ENEMY_POINTS (a scoring table) even though today
 // every AI type has a matching score entry. If you add an AI type, you'll usually want to
 // add a score entry too, but the two lists are allowed to diverge.
-export const ENEMY_AI_TYPES = ['walker', 'chaser'];
+export const ENEMY_AI_TYPES = Object.freeze(['walker', 'chaser']);
 
 // Arrows + WASD both bound; Space for bomb; Escape is fixed (not remappable) so it can
 // always reach the pause menu even mid-play.
-export const KEY_BINDINGS = {
+export const KEY_BINDINGS = Object.freeze({
   ArrowUp: 'up',
   ArrowDown: 'down',
   ArrowLeft: 'left',
@@ -56,4 +56,4 @@ export const KEY_BINDINGS = {
   d: 'right',
   ' ': 'bomb',
   Escape: 'pause',
-};
+});
