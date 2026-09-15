@@ -183,6 +183,14 @@ describe('initGameState', () => {
     expect(state.grid[state.exit.row][state.exit.col].type).toBe('soft');
   });
 
+  it('forces the exit onto the first enemy-eligible tile in row-major order when no soft blocks were rolled', () => {
+    // (1, 3) is skipped because it touches the spawn safe zone and was never an enemy
+    // candidate, so the fallback's first candidate is (1, 4).
+    const state = initGameState({ random: () => 1 });
+
+    expect(state.exit).toEqual({ row: 1, col: 4 });
+  });
+
   it('places no soft blocks from the main roll when the RNG equals SOFT_BLOCK_DENSITY exactly', () => {
     // The placement check is strict `<`, so a roll exactly at the threshold counts as
     // not favoring placement, same as any higher value — only the exit fallback's forced
