@@ -11,6 +11,7 @@ import {
   ENEMY_COUNT,
   ENEMY_AI_TYPES,
   SOFT_BLOCK_DENSITY,
+  PLAYER_SPEED,
 } from '../src/constants.js';
 
 describe('initGameState', () => {
@@ -39,6 +40,12 @@ describe('initGameState', () => {
     expect(state.player.maxBombs).toBe(DEFAULT_MAX_BOMBS);
     expect(state.player.activeBombs).toBe(0);
     expect(state.player.blastRadius).toBe(DEFAULT_BLAST_RADIUS);
+  });
+
+  it('starts the player at the default movement speed', () => {
+    const state = initGameState();
+
+    expect(state.player.speed).toBe(PLAYER_SPEED);
   });
 
   it('starts the player facing down', () => {
