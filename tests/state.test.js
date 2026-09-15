@@ -257,6 +257,44 @@ describe('initGameState', () => {
     });
   });
 
+  it('never spawns an enemy on a tile orthogonally adjacent to the spawn safe zone', () => {
+    // Every eligible cell rolls soft except the two tiles touching the safe zone, so those
+    // two are the first empty candidates in row-major order. Every later call returns 0,
+    // so the enemy picks take index 0 each time — without the exclusion, two enemies
+    // would land exactly on those tiles.
+    const adjacentTiles = [
+      [1, 3],
+      [3, 1],
+    ];
+    const emptyRollCalls = [];
+    let eligibleCount = 0;
+    for (let row = 1; row < GRID_ROWS - 1; row += 1) {
+      for (let col = 1; col < GRID_COLS - 1; col += 1) {
+        const isPillar = row % 2 === 0 && col % 2 === 0;
+        const isSpawnSafeZone =
+          (row === 1 && col === 1) || (row === 1 && col === 2) || (row === 2 && col === 1);
+        if (!isPillar && !isSpawnSafeZone) {
+          eligibleCount += 1;
+          if (adjacentTiles.some(([r, c]) => r === row && c === col)) {
+            emptyRollCalls.push(eligibleCount);
+          }
+        }
+      }
+    }
+
+    let call = 0;
+    const random = () => {
+      call += 1;
+      return emptyRollCalls.includes(call) ? 0.9 : 0;
+    };
+    const state = initGameState({ random });
+
+    expect(state.enemies).toHaveLength(ENEMY_COUNT);
+    state.enemies.forEach((enemy) => {
+      expect(adjacentTiles).not.toContainEqual([enemy.row, enemy.col]);
+    });
+  });
+
   it('returns an independent GameState on every call', () => {
     // Restart calls initGameState() again and expects a clean board — if any array or
     // object were shared across calls (e.g. hoisted to module scope), mutating one
