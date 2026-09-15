@@ -15,6 +15,33 @@ import {
   ENEMY_SPEED,
 } from '../src/constants.js';
 
+// Test-side copy of the grid rules, deliberately not imported from state.js: a test that
+// reused the production rule would keep passing if that rule were wrong.
+const SPAWN_SAFE_ZONE = [
+  [1, 1],
+  [1, 2],
+  [2, 1],
+];
+
+function isInSpawnSafeZone(row, col) {
+  return SPAWN_SAFE_ZONE.some(([r, c]) => r === row && c === col);
+}
+
+// Interior tiles that consume one random() roll during grid generation, in the row-major
+// order the rolls happen — so a tile's index + 1 is the call number that decides it.
+function listEligibleTiles() {
+  const tiles = [];
+  for (let row = 1; row < GRID_ROWS - 1; row += 1) {
+    for (let col = 1; col < GRID_COLS - 1; col += 1) {
+      const isPillar = row % 2 === 0 && col % 2 === 0;
+      if (!isPillar && !isInSpawnSafeZone(row, col)) tiles.push({ row, col });
+    }
+  }
+  return tiles;
+}
+
+const ELIGIBLE_TILES = listEligibleTiles();
+
 describe('initGameState', () => {
   it('starts idle with zero score and a full stage timer', () => {
     const state = initGameState();
@@ -97,23 +124,13 @@ describe('initGameState', () => {
   it('fills eligible interior tiles with soft blocks when the RNG always favors placement', () => {
     const state = initGameState({ random: () => 0 });
 
-    let eligibleCount = 0;
-    let softCount = 0;
-    for (let row = 1; row < GRID_ROWS - 1; row += 1) {
-      for (let col = 1; col < GRID_COLS - 1; col += 1) {
-        const isPillar = row % 2 === 0 && col % 2 === 0;
-        const isSpawnSafeZone =
-          (row === 1 && col === 1) || (row === 1 && col === 2) || (row === 2 && col === 1);
-        if (!isPillar && !isSpawnSafeZone) {
-          eligibleCount += 1;
-          if (state.grid[row][col].type === 'soft') softCount += 1;
-        }
-      }
-    }
+    const softCount = ELIGIBLE_TILES.filter(
+      ({ row, col }) => state.grid[row][col].type === 'soft'
+    ).length;
     // Exactly ENEMY_COUNT of the eligible cells get reclaimed back to 'empty' by buildGrid's
     // enemy-space guarantee, even when every RNG roll favored soft-block placement —
     // deterministic under this fixture, not just "most of them."
-    expect(softCount).toBe(eligibleCount - ENEMY_COUNT);
+    expect(softCount).toBe(ELIGIBLE_TILES.length - ENEMY_COUNT);
   });
 
   it('reclaims the soft blocks farthest from spawn when making room for enemies', () => {
@@ -122,16 +139,9 @@ describe('initGameState', () => {
     // from the player, so the three tiles turned back to 'empty' must be the last three.
     const state = initGameState({ random: () => 0 });
 
-    const reclaimedTiles = [];
-    for (let row = 1; row < GRID_ROWS - 1; row += 1) {
-      for (let col = 1; col < GRID_COLS - 1; col += 1) {
-        const isSpawnSafeZone =
-          (row === 1 && col === 1) || (row === 1 && col === 2) || (row === 2 && col === 1);
-        if (!isSpawnSafeZone && state.grid[row][col].type === 'empty') {
-          reclaimedTiles.push({ row, col });
-        }
-      }
-    }
+    const reclaimedTiles = ELIGIBLE_TILES.filter(
+      ({ row, col }) => state.grid[row][col].type === 'empty'
+    );
     expect(reclaimedTiles).toEqual([
       { row: 9, col: 9 },
       { row: 9, col: 10 },
@@ -142,12 +152,7 @@ describe('initGameState', () => {
   it('keeps the spawn safe zone and the player tile walkable even when the RNG always favors placement', () => {
     const state = initGameState({ random: () => 0 });
 
-    const safeZone = [
-      [1, 1],
-      [1, 2],
-      [2, 1],
-    ];
-    safeZone.forEach(([row, col]) => {
+    SPAWN_SAFE_ZONE.forEach(([row, col]) => {
       expect(state.grid[row][col].type).toBe('empty');
     });
     expect(state.grid[state.player.row][state.player.col].type).toBe('empty');
@@ -166,11 +171,10 @@ describe('initGameState', () => {
     // floor(0.51 * 76) = 38, and the 39th eligible cell in row-major order is (5, 8).
     // A mid-board fraction rules out a hardcoded first or last index, and 0.51 lands
     // between integers so rounding up instead of flooring picks a different cell.
-    const eligibleCount = 76;
     let call = 0;
     const random = () => {
       call += 1;
-      return call === eligibleCount + 1 ? 0.51 : 0;
+      return call === ELIGIBLE_TILES.length + 1 ? 0.51 : 0;
     };
     const state = initGameState({ random });
 
@@ -210,15 +214,10 @@ describe('initGameState', () => {
   it('does not crash when the RNG returns exactly 1 during enemy index selection', () => {
     const state = initGameState({ random: () => 1 });
 
-    const safeZone = [
-      [1, 1],
-      [1, 2],
-      [2, 1],
-    ];
     expect(state.enemies).toHaveLength(ENEMY_COUNT);
     state.enemies.forEach((enemy) => {
       expect(state.grid[enemy.row][enemy.col].type).toBe('empty');
-      expect(safeZone).not.toContainEqual([enemy.row, enemy.col]);
+      expect(SPAWN_SAFE_ZONE).not.toContainEqual([enemy.row, enemy.col]);
     });
   });
 
@@ -229,12 +228,11 @@ describe('initGameState', () => {
     // floor(0.51 * 71) = 36 -> (5, 11), because removing the first two shifted it down.
     // Mid-pool fractions between integers rule out a hardcoded index, rounding up, and
     // picking without removing the chosen candidate.
-    const eligibleCount = 76;
     let call = 0;
     const random = () => {
       call += 1;
-      if (call <= eligibleCount) return 0.9;
-      if (call === eligibleCount + 1) return 0;
+      if (call <= ELIGIBLE_TILES.length) return 0.9;
+      if (call === ELIGIBLE_TILES.length + 1) return 0;
       return 0.51;
     };
     const state = initGameState({ random });
@@ -291,20 +289,10 @@ describe('initGameState', () => {
     // exit pick — returns 1, landing on the *last* row-major soft cell. That's exactly
     // where buildGrid's reclaim pass starts popping from — the sharpest case for proving
     // the exit is excluded.
-    let eligibleCount = 0;
-    for (let row = 1; row < GRID_ROWS - 1; row += 1) {
-      for (let col = 1; col < GRID_COLS - 1; col += 1) {
-        const isPillar = row % 2 === 0 && col % 2 === 0;
-        const isSpawnSafeZone =
-          (row === 1 && col === 1) || (row === 1 && col === 2) || (row === 2 && col === 1);
-        if (!isPillar && !isSpawnSafeZone) eligibleCount += 1;
-      }
-    }
-
     let call = 0;
     const random = () => {
       call += 1;
-      return call === eligibleCount + 1 ? 1 : 0;
+      return call === ELIGIBLE_TILES.length + 1 ? 1 : 0;
     };
     const state = initGameState({ random });
 
@@ -333,15 +321,10 @@ describe('initGameState', () => {
 
     expect(state.enemies).toHaveLength(ENEMY_COUNT);
 
-    const safeZone = [
-      [1, 1],
-      [1, 2],
-      [2, 1],
-    ];
     state.enemies.forEach((enemy) => {
       expect(enemy.alive).toBe(true);
       expect(state.grid[enemy.row][enemy.col].type).toBe('empty');
-      expect(safeZone).not.toContainEqual([enemy.row, enemy.col]);
+      expect(SPAWN_SAFE_ZONE).not.toContainEqual([enemy.row, enemy.col]);
     });
   });
 
@@ -354,21 +337,9 @@ describe('initGameState', () => {
       [1, 3],
       [3, 1],
     ];
-    const emptyRollCalls = [];
-    let eligibleCount = 0;
-    for (let row = 1; row < GRID_ROWS - 1; row += 1) {
-      for (let col = 1; col < GRID_COLS - 1; col += 1) {
-        const isPillar = row % 2 === 0 && col % 2 === 0;
-        const isSpawnSafeZone =
-          (row === 1 && col === 1) || (row === 1 && col === 2) || (row === 2 && col === 1);
-        if (!isPillar && !isSpawnSafeZone) {
-          eligibleCount += 1;
-          if (adjacentTiles.some(([r, c]) => r === row && c === col)) {
-            emptyRollCalls.push(eligibleCount);
-          }
-        }
-      }
-    }
+    const emptyRollCalls = adjacentTiles.map(
+      ([row, col]) => ELIGIBLE_TILES.findIndex((tile) => tile.row === row && tile.col === col) + 1
+    );
 
     let call = 0;
     const random = () => {
