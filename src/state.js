@@ -21,6 +21,14 @@ function isInSpawnSafeZone(row, col) {
   );
 }
 
+// An enemy one step outside the safe zone can reach the player before they've moved at all.
+// Only enemy spawns avoid these tiles — soft blocks may still land here, so terrain and the
+// RNG call order stay identical to a board without this rule.
+function isNextToSpawnSafeZone(row, col) {
+  const { row: spawnRow, col: spawnCol } = PLAYER_SPAWN;
+  return (row === spawnRow && col === spawnCol + 2) || (row === spawnRow + 2 && col === spawnCol);
+}
+
 // RNG contract: random() must return a number in [0, 1] — the clamp below tolerates
 // exactly 1 (unlike Math.random(), which never reaches it), but a negative number or
 // NaN is out of contract and not guarded against. Called once per eligible interior
@@ -46,7 +54,7 @@ function buildGrid(random) {
       } else if (!isSpawnSafeZone && random() < SOFT_BLOCK_DENSITY) {
         type = 'soft';
         softCells.push({ row, col });
-      } else if (!isSpawnSafeZone) {
+      } else if (!isSpawnSafeZone && !isNextToSpawnSafeZone(row, col)) {
         emptyCells.push({ row, col });
       }
 
@@ -70,11 +78,14 @@ function buildGrid(random) {
 
   // Guarantee enough walkable tiles exist for every enemy, even if the RNG saturated the
   // board with soft blocks — reclaims soft cells back to 'empty' (never the cell concealing
-  // the exit), so the grid can end up with fewer 'soft' cells than the RNG roll alone
+  // the exit, and never a tile enemies can't spawn on, since reclaiming one wouldn't add a
+  // candidate), so the grid can end up with fewer 'soft' cells than the RNG roll alone
   // produced. Pops from the end of the row-major list so reclaimed tiles, which enemies may
   // then spawn on, sit far from the player's top-left spawn.
   const reclaimableSoftCells = softCells.filter(
-    (cell) => !(cell.row === exit.row && cell.col === exit.col)
+    (cell) =>
+      !(cell.row === exit.row && cell.col === exit.col) &&
+      !isNextToSpawnSafeZone(cell.row, cell.col)
   );
   while (emptyCells.length < ENEMY_COUNT && reclaimableSoftCells.length > 0) {
     const reclaimed = reclaimableSoftCells.pop();
