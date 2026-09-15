@@ -100,7 +100,6 @@ function buildEnemies(grid, random, exit) {
     candidates.push(reclaimed);
   }
 
-  const aiTypes = ENEMY_AI_TYPES;
   const enemies = [];
   for (let i = 0; i < ENEMY_COUNT; i += 1) {
     const index = Math.min(Math.floor(random() * candidates.length), candidates.length - 1);
@@ -112,7 +111,7 @@ function buildEnemies(grid, random, exit) {
       x: col * TILE_SIZE_PX,
       y: row * TILE_SIZE_PX,
       alive: true,
-      aiType: aiTypes[i % aiTypes.length],
+      aiType: ENEMY_AI_TYPES[i % ENEMY_AI_TYPES.length],
     });
   }
   return enemies;
