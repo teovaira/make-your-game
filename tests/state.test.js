@@ -201,6 +201,35 @@ describe('initGameState', () => {
     expect(typesUsed.size).toBe(Math.min(ENEMY_COUNT, ENEMY_AI_TYPES.length));
   });
 
+  it('never reclaims the exit tile when the enemy-space guarantee reclaims other soft cells', () => {
+    // Every eligible cell rolls soft (random() = 0), then the very next call — the
+    // exit pick — returns 1, landing on the *last* row-major soft cell. buildEnemies
+    // scans in the same row-major order, so that's exactly where its reclaim pass
+    // starts popping from — the sharpest case for proving the exit is excluded.
+    let eligibleCount = 0;
+    for (let row = 1; row < GRID_ROWS - 1; row += 1) {
+      for (let col = 1; col < GRID_COLS - 1; col += 1) {
+        const isPillar = row % 2 === 0 && col % 2 === 0;
+        const isSpawnSafeZone =
+          (row === 1 && col === 1) || (row === 1 && col === 2) || (row === 2 && col === 1);
+        if (!isPillar && !isSpawnSafeZone) eligibleCount += 1;
+      }
+    }
+
+    let call = 0;
+    const random = () => {
+      call += 1;
+      return call === eligibleCount + 1 ? 1 : 0;
+    };
+    const state = initGameState({ random });
+
+    expect(state.grid[state.exit.row][state.exit.col].type).toBe('soft');
+    const enemyOnExit = state.enemies.some(
+      (enemy) => enemy.row === state.exit.row && enemy.col === state.exit.col
+    );
+    expect(enemyOnExit).toBe(false);
+  });
+
   it('guarantees ENEMY_COUNT enemies even when soft blocks fill every non-safe-zone tile', () => {
     const state = initGameState({ random: () => 0 });
     expect(state.enemies).toHaveLength(ENEMY_COUNT);
