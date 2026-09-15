@@ -12,6 +12,7 @@ import {
   ENEMY_AI_TYPES,
   SOFT_BLOCK_DENSITY,
   PLAYER_SPEED,
+  ENEMY_SPEED,
 } from '../src/constants.js';
 
 describe('initGameState', () => {
@@ -191,6 +192,12 @@ describe('initGameState', () => {
       expect(enemy.x).toBe(enemy.col * TILE_SIZE_PX);
       expect(enemy.y).toBe(enemy.row * TILE_SIZE_PX);
     });
+  });
+
+  it('starts every enemy at the default enemy speed', () => {
+    const state = initGameState();
+
+    state.enemies.forEach((enemy) => expect(enemy.speed).toBe(ENEMY_SPEED));
   });
 
   it('gives every enemy a unique id', () => {
