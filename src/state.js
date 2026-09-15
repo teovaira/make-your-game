@@ -80,8 +80,9 @@ function buildGrid(random) {
 
   // Guarantee enough walkable tiles exist for every enemy, even if the RNG saturated the
   // board with soft blocks — reclaims soft cells back to 'empty' (never the cell concealing
-  // the exit, and never a tile enemies can't spawn on, since reclaiming one wouldn't add a
-  // candidate), so the grid can end up with fewer 'soft' cells than the RNG roll alone
+  // the exit, and never a tile next to the safe zone — reclaimed tiles go straight into the
+  // enemy candidate pool, so reclaiming one of those would let an enemy spawn there), so
+  // the grid can end up with fewer 'soft' cells than the RNG roll alone
   // produced. Pops from the end of the row-major list so reclaimed tiles, which enemies may
   // then spawn on, sit far from the player's top-left spawn.
   const reclaimableSoftCells = softCells.filter(
