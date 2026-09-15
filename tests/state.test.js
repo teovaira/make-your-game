@@ -191,6 +191,30 @@ describe('initGameState', () => {
     });
   });
 
+  it('uses each enemy-pick roll to choose that enemy tile from the remaining candidates', () => {
+    // Every eligible cell rolls empty, so the forced exit takes the first candidate (1, 4)
+    // and 73 candidates remain, starting at (1, 5). Each enemy pick rolls 0.51 against the
+    // shrinking pool: floor(0.51 * 73) = 37 -> (5, 10); floor(0.51 * 72) = 36 -> (5, 9);
+    // floor(0.51 * 71) = 36 -> (5, 11), because removing the first two shifted it down.
+    // Mid-pool fractions between integers rule out a hardcoded index, rounding up, and
+    // picking without removing the chosen candidate.
+    const eligibleCount = 76;
+    let call = 0;
+    const random = () => {
+      call += 1;
+      if (call <= eligibleCount) return 0.9;
+      if (call === eligibleCount + 1) return 0;
+      return 0.51;
+    };
+    const state = initGameState({ random });
+
+    expect(state.enemies.map(({ row, col }) => ({ row, col }))).toEqual([
+      { row: 5, col: 10 },
+      { row: 5, col: 9 },
+      { row: 5, col: 11 },
+    ]);
+  });
+
   it('places every enemy on a distinct tile', () => {
     // random: () => 1 recomputes the same clamped index every pick if the candidate pool
     // isn't actually shrinking — a regression that stopped removing chosen candidates
