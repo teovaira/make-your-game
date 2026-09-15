@@ -138,6 +138,22 @@ describe('initGameState', () => {
     expect(state.grid[state.exit.row][state.exit.col].type).toBe('soft');
   });
 
+  it('uses the exit-pick roll to choose which soft block conceals the exit', () => {
+    // Every eligible cell rolls soft (76 soft cells), then the exit pick rolls 0.51:
+    // floor(0.51 * 76) = 38, and the 39th eligible cell in row-major order is (5, 8).
+    // A mid-board fraction rules out a hardcoded first or last index, and 0.51 lands
+    // between integers so rounding up instead of flooring picks a different cell.
+    const eligibleCount = 76;
+    let call = 0;
+    const random = () => {
+      call += 1;
+      return call === eligibleCount + 1 ? 0.51 : 0;
+    };
+    const state = initGameState({ random });
+
+    expect(state.exit).toEqual({ row: 5, col: 8 });
+  });
+
   it('still conceals an exit under a soft block when the RNG never favors soft-block placement', () => {
     const state = initGameState({ random: () => 1 });
     expect(state.exit).toBeDefined();
