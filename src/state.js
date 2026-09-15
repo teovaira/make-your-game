@@ -10,6 +10,7 @@ import {
   ENEMY_COUNT,
   ENEMY_AI_TYPES,
   PLAYER_SPAWN,
+  PLAYER_SPEED,
 } from './constants.js';
 
 function isInSpawnSafeZone(row, col) {
@@ -143,6 +144,7 @@ export function initGameState({ random = Math.random } = {}) {
       maxBombs: DEFAULT_MAX_BOMBS,
       activeBombs: 0,
       blastRadius: DEFAULT_BLAST_RADIUS,
+      speed: PLAYER_SPEED,
     },
   };
 }
