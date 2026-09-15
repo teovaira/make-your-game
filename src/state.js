@@ -26,12 +26,13 @@ function isInSpawnSafeZone(row, col) {
 // NaN is out of contract and not guarded against. Called once per eligible interior
 // cell — border, pillar, and spawn-safe-zone cells are never eligible and never
 // consume a call — in row-major order, while building the grid; then once more to
-// pick which soft cell conceals the exit. The exit-guarantee fallback below (when the
-// RNG never favors soft-block placement) does its own grid scan and consumes no extra
-// random() calls.
+// pick which soft cell conceals the exit. The exit and enemy-space guarantees below
+// don't call random() at all — they use deterministic shift()/pop(), so they don't
+// change this call count.
 function buildGrid(random) {
   const grid = [];
   const softCells = [];
+  const emptyCells = [];
   for (let row = 0; row < GRID_ROWS; row += 1) {
     const cols = [];
     for (let col = 0; col < GRID_COLS; col += 1) {
@@ -45,6 +46,8 @@ function buildGrid(random) {
       } else if (!isSpawnSafeZone && random() < SOFT_BLOCK_DENSITY) {
         type = 'soft';
         softCells.push({ row, col });
+      } else if (!isSpawnSafeZone) {
+        emptyCells.push({ row, col });
       }
 
       cols.push({ type });
@@ -54,56 +57,41 @@ function buildGrid(random) {
 
   // Guarantee an exit can always be concealed, even if the RNG never favored soft-block
   // placement (e.g. every roll landed above SOFT_BLOCK_DENSITY) — an unwinnable board with
-  // no error signal is worse than force-converting one tile.
+  // no error signal is worse than force-converting one tile. Takes the first eligible
+  // empty cell in scan order, same tile an independent row-major search would find first.
   if (softCells.length === 0) {
-    for (let row = 0; row < GRID_ROWS && softCells.length === 0; row += 1) {
-      for (let col = 0; col < GRID_COLS && softCells.length === 0; col += 1) {
-        if (grid[row][col].type === 'empty' && !isInSpawnSafeZone(row, col)) {
-          grid[row][col].type = 'soft';
-          softCells.push({ row, col });
-        }
-      }
-    }
+    const forced = emptyCells.shift();
+    grid[forced.row][forced.col].type = 'soft';
+    softCells.push(forced);
   }
 
   const exitIndex = Math.min(Math.floor(random() * softCells.length), softCells.length - 1);
   const exit = softCells[exitIndex];
 
-  return { grid, exit };
+  // Guarantee enough walkable tiles exist for every enemy, even if the RNG saturated the
+  // board with soft blocks — reclaims soft cells back to 'empty' (never the cell concealing
+  // the exit), so the grid can end up with fewer 'soft' cells than the RNG roll alone
+  // produced. Reclaiming from the end mirrors the original independent-scan order.
+  const reclaimableSoftCells = softCells.filter(
+    (cell) => !(cell.row === exit.row && cell.col === exit.col)
+  );
+  while (emptyCells.length < ENEMY_COUNT && reclaimableSoftCells.length > 0) {
+    const reclaimed = reclaimableSoftCells.pop();
+    grid[reclaimed.row][reclaimed.col].type = 'empty';
+    emptyCells.push(reclaimed);
+  }
+
+  return { grid, exit, emptyCells };
 }
 
 // RNG contract (continued): after buildGrid's calls above, random() is called exactly
 // ENEMY_COUNT times here, once per enemy placed (a return value of exactly 1 is safe,
-// same as above). The enemy-count-guarantee reclaim below is a deterministic pop(), not
-// random(), so it doesn't change this call count.
-function buildEnemies(grid, random, exit) {
-  const candidates = [];
-  const softCells = [];
-  for (let row = 0; row < GRID_ROWS; row += 1) {
-    for (let col = 0; col < GRID_COLS; col += 1) {
-      const cell = grid[row][col];
-      if (cell.type === 'empty' && !isInSpawnSafeZone(row, col)) {
-        candidates.push({ row, col });
-      } else if (cell.type === 'soft' && !(row === exit.row && col === exit.col)) {
-        softCells.push({ row, col });
-      }
-    }
-  }
-
-  // Guarantee enough walkable tiles exist for every enemy, even if the RNG saturated the
-  // board with soft blocks — reclaims soft cells back to 'empty' (never the cell concealing
-  // the exit), so state.grid can end up with fewer 'soft' cells than the RNG roll alone
-  // produced.
-  while (candidates.length < ENEMY_COUNT && softCells.length > 0) {
-    const reclaimed = softCells.pop();
-    grid[reclaimed.row][reclaimed.col].type = 'empty';
-    candidates.push(reclaimed);
-  }
-
+// same as above).
+function buildEnemies(emptyCells, random) {
   const enemies = [];
   for (let i = 0; i < ENEMY_COUNT; i += 1) {
-    const index = Math.min(Math.floor(random() * candidates.length), candidates.length - 1);
-    const { row, col } = candidates.splice(index, 1)[0];
+    const index = Math.min(Math.floor(random() * emptyCells.length), emptyCells.length - 1);
+    const { row, col } = emptyCells.splice(index, 1)[0];
     enemies.push({
       id: `enemy-${i}`,
       row,
@@ -118,8 +106,8 @@ function buildEnemies(grid, random, exit) {
 }
 
 export function initGameState({ random = Math.random } = {}) {
-  const { grid, exit } = buildGrid(random);
-  const enemies = buildEnemies(grid, random, exit);
+  const { grid, exit, emptyCells } = buildGrid(random);
+  const enemies = buildEnemies(emptyCells, random);
 
   return {
     status: 'idle',
