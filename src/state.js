@@ -11,6 +11,7 @@ import {
   ENEMY_AI_TYPES,
   PLAYER_SPAWN,
   PLAYER_SPEED,
+  ENEMY_SPEED,
 } from './constants.js';
 
 function isInSpawnSafeZone(row, col) {
@@ -113,6 +114,7 @@ function buildEnemies(emptyCells, random) {
       y: row * TILE_SIZE_PX,
       alive: true,
       aiType: ENEMY_AI_TYPES[i % ENEMY_AI_TYPES.length],
+      speed: ENEMY_SPEED,
     });
   }
   return enemies;
