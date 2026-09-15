@@ -256,4 +256,22 @@ describe('initGameState', () => {
       expect(safeZone).not.toContainEqual([enemy.row, enemy.col]);
     });
   });
+
+  it('returns an independent GameState on every call', () => {
+    // Restart calls initGameState() again and expects a clean board — if any array or
+    // object were shared across calls (e.g. hoisted to module scope), mutating one
+    // game's state would corrupt the next.
+    const first = initGameState();
+    const second = initGameState();
+
+    expect(first.grid).not.toBe(second.grid);
+    expect(first.bombs).not.toBe(second.bombs);
+    expect(first.explosions).not.toBe(second.explosions);
+    expect(first.powerUps).not.toBe(second.powerUps);
+    expect(first.enemies).not.toBe(second.enemies);
+    expect(first.player).not.toBe(second.player);
+
+    first.bombs.push({ id: 'test-bomb' });
+    expect(second.bombs).toEqual([]);
+  });
 });
