@@ -185,6 +185,13 @@ describe('initGameState', () => {
     });
   });
 
+  it('gives every enemy a unique id', () => {
+    const state = initGameState();
+
+    const ids = new Set(state.enemies.map((enemy) => enemy.id));
+    expect(ids.size).toBe(ENEMY_COUNT);
+  });
+
   it('guarantees ENEMY_COUNT enemies even when soft blocks fill every non-safe-zone tile', () => {
     const state = initGameState({ random: () => 0 });
     expect(state.enemies).toHaveLength(ENEMY_COUNT);
