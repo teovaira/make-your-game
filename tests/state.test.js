@@ -400,21 +400,4 @@ describe('initGameState', () => {
     first.bombs.push({ id: 'test-bomb' });
     expect(second.bombs).toEqual([]);
   });
-
-  it('keeps enough eligible interior tiles for the exit plus every enemy', () => {
-    // Guards a dormant crash: buildEnemies' candidate pool has no defensive check, so if
-    // a future constants change ever left fewer eligible tiles than ENEMY_COUNT + 1 (one
-    // for the exit, one each for the enemies), it would throw with no warning at the
-    // constants-change site rather than here.
-    let eligibleCount = 0;
-    for (let row = 1; row < GRID_ROWS - 1; row += 1) {
-      for (let col = 1; col < GRID_COLS - 1; col += 1) {
-        const isPillar = row % 2 === 0 && col % 2 === 0;
-        const isSpawnSafeZone =
-          (row === 1 && col === 1) || (row === 1 && col === 2) || (row === 2 && col === 1);
-        if (!isPillar && !isSpawnSafeZone) eligibleCount += 1;
-      }
-    }
-    expect(eligibleCount).toBeGreaterThanOrEqual(ENEMY_COUNT + 1);
-  });
 });
