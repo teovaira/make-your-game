@@ -176,6 +176,15 @@ describe('initGameState', () => {
     expect(occupiedTiles.size).toBe(ENEMY_COUNT);
   });
 
+  it('derives each enemy pixel position from its grid tile', () => {
+    const state = initGameState();
+
+    state.enemies.forEach((enemy) => {
+      expect(enemy.x).toBe(enemy.col * TILE_SIZE_PX);
+      expect(enemy.y).toBe(enemy.row * TILE_SIZE_PX);
+    });
+  });
+
   it('guarantees ENEMY_COUNT enemies even when soft blocks fill every non-safe-zone tile', () => {
     const state = initGameState({ random: () => 0 });
     expect(state.enemies).toHaveLength(ENEMY_COUNT);
