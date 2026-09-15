@@ -71,10 +71,10 @@ function buildGrid(random) {
   return { grid, exit };
 }
 
-// RNG contract (continued): after buildGrid's calls above, random() is called once per
-// enemy placed here, up to ENEMY_COUNT times (a return value of exactly 1 is safe, same as
-// above). The enemy-count-guarantee reclaim below is a deterministic pop(), not random(),
-// so it doesn't change this call count either.
+// RNG contract (continued): after buildGrid's calls above, random() is called exactly
+// ENEMY_COUNT times here, once per enemy placed (a return value of exactly 1 is safe,
+// same as above). The enemy-count-guarantee reclaim below is a deterministic pop(), not
+// random(), so it doesn't change this call count.
 function buildEnemies(grid, random, exit) {
   const candidates = [];
   const softCells = [];
