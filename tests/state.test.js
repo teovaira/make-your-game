@@ -237,6 +237,9 @@ describe('initGameState', () => {
     };
     const state = initGameState({ random });
 
+    // Pins the fixture's premise: without it, a change to the RNG call order could move the
+    // exit to the other end of the board and every assertion below would still pass.
+    expect(state.exit).toEqual({ row: GRID_ROWS - 2, col: GRID_COLS - 2 });
     expect(state.grid[state.exit.row][state.exit.col].type).toBe('soft');
     const enemyOnExit = state.enemies.some(
       (enemy) => enemy.row === state.exit.row && enemy.col === state.exit.col
