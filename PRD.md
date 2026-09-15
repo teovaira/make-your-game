@@ -4,7 +4,7 @@
 | ------------------ | -------------------------------------------------- |
 | **Document owner** | Theo (game logic) · Vasiliki (rendering & UI)      |
 | **Status**         | v1.1 — genre locked, verified against 2026 sources |
-| **Last updated**   | 2026-08-30                                         |
+| **Last updated**   | 2026-09-15                                         |
 | **Stakeholders**   | Project team, school reviewer/grader (zone01)      |
 | **Genre**          | **Bomberman** (from the pre-approved list)         |
 
@@ -88,7 +88,7 @@ Chosen for its excellent DOM fit: a deterministic tile grid with no physics simu
 
 - **3 starting lives** (classic max is 9 — extra lives are optional scope).
 - The player dies from touching an enemy or being caught in any blast (including their own).
-- **2–4 enemies** per level with simple AI (random-walk and/or chase). Any blast kills an enemy; enemies have 1 HP.
+- **2–4 enemies** per level with simple AI (random-walk and/or chase). Any blast kills an enemy; enemies have 1 HP. Enemies never start inside the player's spawn safe zone or on a tile directly next to it, so the player isn't caught before they can move.
 - On death, most power-ups are lost; firepower, bomb count, and speed persist (minor source conflict on speed — team may simplify).
 
 **Power-ups (minimum viable set)**
