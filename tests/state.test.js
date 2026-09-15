@@ -9,6 +9,7 @@ import {
   GRID_ROWS,
   GRID_COLS,
   ENEMY_COUNT,
+  ENEMY_AI_TYPES,
   SOFT_BLOCK_DENSITY,
 } from '../src/constants.js';
 
@@ -190,6 +191,14 @@ describe('initGameState', () => {
 
     const ids = new Set(state.enemies.map((enemy) => enemy.id));
     expect(ids.size).toBe(ENEMY_COUNT);
+  });
+
+  it('cycles enemies through every AI type', () => {
+    const state = initGameState();
+
+    state.enemies.forEach((enemy) => expect(ENEMY_AI_TYPES).toContain(enemy.aiType));
+    const typesUsed = new Set(state.enemies.map((enemy) => enemy.aiType));
+    expect(typesUsed.size).toBe(Math.min(ENEMY_COUNT, ENEMY_AI_TYPES.length));
   });
 
   it('guarantees ENEMY_COUNT enemies even when soft blocks fill every non-safe-zone tile', () => {
