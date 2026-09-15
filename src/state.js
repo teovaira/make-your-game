@@ -21,13 +21,14 @@ function isInSpawnSafeZone(row, col) {
   );
 }
 
-// RNG contract: random() is called once per eligible interior cell — border, pillar, and
-// spawn-safe-zone cells are never eligible and never consume a call — in row-major order,
-// while building the grid; then once more to pick which soft cell conceals the exit. A
-// return value of exactly 1 is safe (the index pick is clamped); it does not need to stay
-// strictly below 1 the way Math.random()'s contract does. The exit-guarantee fallback below
-// (when the RNG never favors soft-block placement) does its own grid scan and consumes no
-// extra random() calls.
+// RNG contract: random() must return a number in [0, 1] — the clamp below tolerates
+// exactly 1 (unlike Math.random(), which never reaches it), but a negative number or
+// NaN is out of contract and not guarded against. Called once per eligible interior
+// cell — border, pillar, and spawn-safe-zone cells are never eligible and never
+// consume a call — in row-major order, while building the grid; then once more to
+// pick which soft cell conceals the exit. The exit-guarantee fallback below (when the
+// RNG never favors soft-block placement) does its own grid scan and consumes no extra
+// random() calls.
 function buildGrid(random) {
   const grid = [];
   const softCells = [];
