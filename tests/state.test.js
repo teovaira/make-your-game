@@ -116,6 +116,29 @@ describe('initGameState', () => {
     expect(softCount).toBe(eligibleCount - ENEMY_COUNT);
   });
 
+  it('reclaims the soft blocks farthest from spawn when making room for enemies', () => {
+    // Every roll returns 0: every eligible cell rolls soft and the exit pick takes the first
+    // one, (1, 3). Reclaiming from the bottom-right end of the board keeps enemy spawns away
+    // from the player, so the three tiles turned back to 'empty' must be the last three.
+    const state = initGameState({ random: () => 0 });
+
+    const reclaimedTiles = [];
+    for (let row = 1; row < GRID_ROWS - 1; row += 1) {
+      for (let col = 1; col < GRID_COLS - 1; col += 1) {
+        const isSpawnSafeZone =
+          (row === 1 && col === 1) || (row === 1 && col === 2) || (row === 2 && col === 1);
+        if (!isSpawnSafeZone && state.grid[row][col].type === 'empty') {
+          reclaimedTiles.push({ row, col });
+        }
+      }
+    }
+    expect(reclaimedTiles).toEqual([
+      { row: 9, col: 9 },
+      { row: 9, col: 10 },
+      { row: 9, col: 11 },
+    ]);
+  });
+
   it('keeps the spawn safe zone and the player tile walkable even when the RNG always favors placement', () => {
     const state = initGameState({ random: () => 0 });
 
