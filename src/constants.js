@@ -12,16 +12,18 @@ export const EXPLOSION_DURATION_MS = 500;
 export const PLAYER_SPEED = 0.15; // px/ms — crosses one 40px tile in ~267ms
 export const ENEMY_SPEED = 0.1; // px/ms — ~400ms/tile, slower than the player by design
 
-// Probability an eligible interior tile becomes soft during grid generation — the realized
-// count can end up slightly lower, since initGameState always leaves room for one exit and
-// ENEMY_COUNT walkable tiles even if this roll doesn't naturally produce enough.
+// Probability an eligible interior tile becomes soft during grid generation. The realized
+// count can differ slightly from the roll in either direction: buildGrid forces one soft
+// block if none were rolled (so an exit can be concealed) and reclaims soft blocks if too
+// few walkable tiles are left for ENEMY_COUNT enemies.
 export const SOFT_BLOCK_DENSITY = 0.6;
 
 export const ENEMY_COUNT = 3; // one fixed level, so a single value instead of a 2-4 range
 
 // Player's starting tile. Also anchors the 3-tile spawn safe zone (this tile, one right,
-// one down) that's excluded from soft-block placement and enemy spawns — keep this as the
-// only place spawn coordinates are written; isInSpawnSafeZone derives from it.
+// one down) that's excluded from soft-block placement and enemy spawns. That shape assumes
+// a top-left spawn — moving this toward another corner puts the zone on border walls, so
+// isInSpawnSafeZone would need reworking too.
 export const PLAYER_SPAWN = { row: 1, col: 1 };
 
 export const DEFAULT_MAX_BOMBS = 1;

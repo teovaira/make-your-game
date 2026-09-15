@@ -57,8 +57,8 @@ function buildGrid(random) {
 
   // Guarantee an exit can always be concealed, even if the RNG never favored soft-block
   // placement (e.g. every roll landed above SOFT_BLOCK_DENSITY) — an unwinnable board with
-  // no error signal is worse than force-converting one tile. Takes the first eligible
-  // empty cell in scan order, same tile an independent row-major search would find first.
+  // no error signal is worse than force-converting one tile. Picks deterministically so the
+  // fallback doesn't consume a random() call and shift the documented call order.
   if (softCells.length === 0) {
     const forced = emptyCells.shift();
     grid[forced.row][forced.col].type = 'soft';
@@ -71,7 +71,8 @@ function buildGrid(random) {
   // Guarantee enough walkable tiles exist for every enemy, even if the RNG saturated the
   // board with soft blocks — reclaims soft cells back to 'empty' (never the cell concealing
   // the exit), so the grid can end up with fewer 'soft' cells than the RNG roll alone
-  // produced. Reclaiming from the end mirrors the original independent-scan order.
+  // produced. Pops from the end of the row-major list so reclaimed tiles, which enemies may
+  // then spawn on, sit far from the player's top-left spawn.
   const reclaimableSoftCells = softCells.filter(
     (cell) => !(cell.row === exit.row && cell.col === exit.col)
   );

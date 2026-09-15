@@ -102,9 +102,9 @@ describe('initGameState', () => {
         }
       }
     }
-    // Exactly ENEMY_COUNT of the eligible cells get reclaimed back to 'empty' to guarantee
-    // enemy placement (see buildEnemies), even when every RNG roll favored soft-block
-    // placement — deterministic under this fixture, not just "most of them."
+    // Exactly ENEMY_COUNT of the eligible cells get reclaimed back to 'empty' by buildGrid's
+    // enemy-space guarantee, even when every RNG roll favored soft-block placement —
+    // deterministic under this fixture, not just "most of them."
     expect(softCount).toBe(eligibleCount - ENEMY_COUNT);
   });
 
@@ -203,9 +203,9 @@ describe('initGameState', () => {
 
   it('never reclaims the exit tile when the enemy-space guarantee reclaims other soft cells', () => {
     // Every eligible cell rolls soft (random() = 0), then the very next call — the
-    // exit pick — returns 1, landing on the *last* row-major soft cell. buildEnemies
-    // scans in the same row-major order, so that's exactly where its reclaim pass
-    // starts popping from — the sharpest case for proving the exit is excluded.
+    // exit pick — returns 1, landing on the *last* row-major soft cell. That's exactly
+    // where buildGrid's reclaim pass starts popping from — the sharpest case for proving
+    // the exit is excluded.
     let eligibleCount = 0;
     for (let row = 1; row < GRID_ROWS - 1; row += 1) {
       for (let col = 1; col < GRID_COLS - 1; col += 1) {
